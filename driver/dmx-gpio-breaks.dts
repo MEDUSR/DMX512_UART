@@ -1,0 +1,50 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2712";
+
+    fragment@0 {
+        target = <&gpio>;
+        __overlay__ {
+            dmx_pins: dmx_pins {
+                /* GPIO14 (UART0 TX) pin configuration states */
+                
+                /* Default state: GPIO14 as UART0 TX */
+                uart_state: uart_state {
+                    brcm,pins = <14>;
+                    brcm,function = <4>; /* ALT0 - UART0 TX */
+                    brcm,pull = <0>;     /* No pull */
+                };
+                
+                /* Break state: GPIO14 as GPIO output */
+                gpio_state: gpio_state {
+                    brcm,pins = <14>;
+                    brcm,function = <1>; /* GPIO output */
+                    brcm,pull = <0>;     /* No pull */
+                };
+            };
+        };
+    };
+
+    fragment@1 {
+        target = <&serial0>;
+        __overlay__ {
+            status = "disabled";
+        };
+    };
+
+    fragment@2 {
+        target-path = "/";
+        __overlay__ {
+            dmx_controller: dmx_controller {
+                compatible = "dmx,gpio-breaks";
+                pinctrl-names = "uart", "gpio";
+                pinctrl-0 = <&uart_state>;
+                pinctrl-1 = <&gpio_state>;
+                tx-gpio = <&gpio 14 0>;
+                status = "okay";
+            };
+        };
+    };
+}; 
